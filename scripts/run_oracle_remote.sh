@@ -11,7 +11,7 @@ else
   (cd "$DIR" && git pull -q || true)
 fi
 cd "$DIR"
-python3 -m pip install -q pynvml cryptography >/dev/null 2>&1 || python3 -m pip install -q --break-system-packages pynvml cryptography
+python3 -m pip install -q nvidia-ml-py cryptography >/dev/null 2>&1 || python3 -m pip install -q --break-system-packages nvidia-ml-py cryptography
 if ! python3 -c "import torch; assert torch.cuda.is_available()" 2>/dev/null; then
   echo "torch avec CUDA absent : installation (quelques minutes)…" >&2
   python3 -m pip install -q torch --index-url https://download.pytorch.org/whl/cu124 || python3 -m pip install -q --break-system-packages torch --index-url https://download.pytorch.org/whl/cu124

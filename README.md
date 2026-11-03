@@ -36,7 +36,7 @@ python -m oracle.verify receipts/<id>.json
 Sur un GPU gratuit, une cellule suffit (voir `notebooks/`) :
 
 ```python
-!git clone -q https://github.com/benjamindarmian/vcd-protocol.git vcd && cd vcd && pip -q install pynvml cryptography && python -m oracle.run --detect --purpose calibration --mode quick --skip network
+!git clone -q https://github.com/benjamindarmian/vcd-protocol.git vcd && cd vcd && pip -q install nvidia-ml-py cryptography && python -m oracle.run --detect --purpose calibration --mode quick --skip network
 ```
 
 ## Pourquoi

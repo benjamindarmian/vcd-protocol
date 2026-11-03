@@ -1,2 +1,2 @@
-pynvml
+nvidia-ml-py
 cryptography

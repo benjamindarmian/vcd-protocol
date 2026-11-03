@@ -27,7 +27,7 @@ seuils appliqués, le verdict, et une signature ed25519 de son hash canonique.
 Sur la machine à mesurer (torch avec CUDA doit être présent ; `pynvml` et `cryptography` s'installent en une seconde) :
 
 ```bash
-pip install pynvml cryptography
+pip install nvidia-ml-py cryptography
 python -m oracle.run --product H100.SXM.8 --min-class A --contract spec/examples/contract.example.json
 python -m oracle.run --detect --purpose index --venue runpod --mode quick     # mesure d'indice
 python -m oracle.verify receipts/rcpt-....json                                # vérifier un reçu
@@ -44,7 +44,7 @@ FAIL signé, marqué « non opposable ».
 Une cellule suffit (Kaggle : activer l'accélérateur GPU T4 ou P100 ; Colab : exécution > modifier le type) :
 
 ```python
-!git clone -q https://github.com/benjamindarmian/vcd-protocol.git vcd && cd vcd && pip -q install pynvml cryptography && python -m oracle.run --detect --purpose calibration --mode quick --skip network
+!git clone -q https://github.com/benjamindarmian/vcd-protocol.git vcd && cd vcd && pip -q install nvidia-ml-py cryptography && python -m oracle.run --detect --purpose calibration --mode quick --skip network
 ```
 
 Le produit `T4.PCIE.1` ou `P100.PCIE.1` est déduit automatiquement. Le but n'est pas la note : c'est de
