@@ -149,7 +149,7 @@ Les frais sont un paramètre du contrat, exprimés en % du notionnel, prélevés
 
 Un oracle est admis s'il publie sa méthode, exécute une suite de conformité d'une version acceptée par le contrat, et signe ses reçus avec une clé dont la publique est enregistrée. Un oracle ne doit être ni vendeur ni acheteur du contrat qu'il mesure. Les reçus d'un oracle sont auditables dans le journal ; un oracle dont les reçus sont contredits par des contre-mesures perd son agrément.
 
-La suite de conformité de référence est décrite dans `oracle/README.md`. Elle dure environ dix minutes en mode complet (cinq minutes de charge de stabilité) et deux minutes en mode rapide, réservé à la calibration.
+La suite de conformité de référence est décrite dans `oracle/README.md`. Elle dure environ dix minutes en mode complet (cinq minutes de charge de stabilité) et deux minutes en mode rapide. Seul le mode complet fait foi pour un contrat et pour la calibration d'un seuil ; le mode rapide vérifie l'identité et l'accès. La mesure de calcul exclut la montée en charge initiale (boost d'horloge) et ne compte que le régime établi.
 
 ## 8. Ce que la v0.1 ne couvre pas
 

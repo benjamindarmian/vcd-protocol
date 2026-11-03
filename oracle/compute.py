@@ -7,25 +7,36 @@ from .util import try_torch
 
 
 def _matmul_loop(torch, dev, n: int, seconds: float, dtype) -> dict:
+    """Mesure le débit en régime établi : une phase de montée en charge (boost, horloges) est exécutée puis
+    écartée, et seules les itérations de la fenêtre de mesure comptent. Sur un T4 à son plafond de puissance,
+    5 s compteraient le boost (22 TFLOPS) alors que le régime établi est à 19,5."""
     a = torch.randn(n, n, device=dev, dtype=dtype)
     b = torch.randn(n, n, device=dev, dtype=dtype)
     c = torch.empty(n, n, device=dev, dtype=dtype)
+    warm = max(3.0, seconds / 3)
+    flop = 2.0 * n * n * n
+
+    def run_for(duration: float):
+        iters = 0
+        t0 = time.perf_counter()
+        elapsed = 0.0
+        while elapsed < duration:
+            for _ in range(10):
+                torch.matmul(a, b, out=c)
+            iters += 10
+            torch.cuda.synchronize(dev)
+            elapsed = time.perf_counter() - t0
+        return iters, elapsed
+
     for _ in range(5):
         torch.matmul(a, b, out=c)
     torch.cuda.synchronize(dev)
-    iters = 0
-    t0 = time.perf_counter()
-    elapsed = 0.0
-    while elapsed < seconds:
-        for _ in range(10):
-            torch.matmul(a, b, out=c)
-        iters += 10
-        torch.cuda.synchronize(dev)
-        elapsed = time.perf_counter() - t0
-    flops = 2.0 * n * n * n * iters
-    del a, b, c
+    w_iters, w_elapsed = run_for(warm)
+    iters, elapsed = run_for(seconds)
+    a = b = c = None  # noqa: F841 - libère la mémoire GPU avant la mesure suivante
     torch.cuda.empty_cache()
-    return {"tflops": round(flops / elapsed / 1e12, 1), "matrix": n, "seconds": round(elapsed, 2), "iters": iters}
+    return {"tflops": round(flop * iters / elapsed / 1e12, 1), "tflops_warmup": round(flop * w_iters / w_elapsed / 1e12, 1),
+            "matrix": n, "seconds": round(elapsed, 2), "warmup_seconds": round(w_elapsed, 2), "iters": iters}
 
 
 def matmul_dtype(torch, index: int):
