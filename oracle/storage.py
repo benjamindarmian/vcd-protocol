@@ -8,7 +8,20 @@ import time
 CHUNK = 8 << 20  # 8 MiB
 
 
-def measure_storage(path: str | None = None, quick: bool = False) -> dict:
+def measure_storage(path: str | None = None, quick: bool = False, passes: int = 3) -> dict:
+    """Médiane de `passes` passages : les disques partagés (Colab, VM) varient du simple au quadruple en quelques minutes."""
+    runs = [_measure_storage_once(path, quick) for _ in range(passes)]
+    ok = [r for r in runs if r.get("status") == "ok"]
+    if not ok:
+        return runs[0]
+    med = lambda k: sorted(r[k] for r in ok)[len(ok) // 2]
+    out = dict(ok[0])
+    out["write_mbs"], out["read_mbs"] = med("write_mbs"), med("read_mbs")
+    out["passes"] = [{"write_mbs": r["write_mbs"], "read_mbs": r["read_mbs"]} for r in ok]
+    return out
+
+
+def _measure_storage_once(path: str | None = None, quick: bool = False) -> dict:
     total = (256 << 20) if quick else (1 << 30)
     directory = path or os.environ.get("VCD_STORAGE_DIR") or os.getcwd()
     try:
