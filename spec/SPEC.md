@@ -39,6 +39,18 @@ Les produits et leurs seuils sont dans `products.json`. Pour chaque produit :
 
 Les seuils de la v0.1 sont **provisoires** : ils viennent des performances publiées et de mesures communautaires. Ils doivent être recalés sur des machines de référence mesurées avec la suite elle-même avant d'être opposables. Toute modification de seuil incrémente la version mineure de la spécification et s'applique seulement aux contrats conclus après publication.
 
+Trois règles encadrent ce qui peut être noté :
+
+1. **Seules les grandeurs reproductibles sont notées.** Une mesure n'entre dans la classe que si sa dispersion observée sur une
+   machine saine est inférieure à 5 % (identité, bande passante mémoire, calcul soutenu sur la phase de charge longue,
+   interconnexion). Les grandeurs bruitées par l'environnement (réseau, stockage) sont relevées, publiées, mais n'ont qu'un
+   effet plafonnant (section 3).
+2. **Le seuil se place hors de la dispersion, avec marge.** Un seuil A est fixé au moins à trois fois la dispersion observée
+   sous la médiane des machines de référence (exemple : T4, régime établi 18,7 à 19,4 TFLOPS, dispersion 3,7 %, seuil A 17).
+3. **Un verdict non conforme sur une mesure primaire n'est prononcé qu'après une contre-mesure automatique.** Si la contre-mesure
+   est conforme, la livraison est conforme ; le reçu conserve les deux mesures. Un bruit ponctuel ne pénalise jamais un
+   vendeur honnête ; un vendeur sous le seuil deux fois de suite est sous le seuil.
+
 Un produit se définit par ce qui est mesuré, pas par le nom du matériel : un nœud vendu comme `H100.SXM.8` dont l'interconnexion mesure 40 GB/s n'est pas un `H100.SXM.8` de classe A, quel que soit l'autocollant.
 
 ## 3. Classes
@@ -139,6 +151,7 @@ FUNDED ──(acheteur annule avant window.start)──► CANCELLED_BUYER
 | Oracle injoignable | un second oracle agréé par le contrat mesure ; à défaut, le contrat passe en ACCEPTED après la fenêtre si l'acheteur ne conteste pas, et la mesure est marquée « non constatée » dans le journal |
 | Acheteur ne se connecte jamais | sans effet : la ressource a été livrée et vérifiée, le contrat se règle |
 | Panne pendant la fenêtre | hors périmètre de la v0.1 (la conformité est constatée à la livraison) ; l'acheteur signale, le journal l'enregistre contre la réputation du vendeur |
+| Mesure primaire sous le seuil | contre-mesure automatique par le même oracle avant tout verdict (section 2, règle 3) ; les deux mesures figurent au reçu |
 | Contestation du reçu | la partie qui conteste demande une contre-mesure par un second oracle dans l'heure ; le reçu majoritaire l'emporte ; le coût de la contre-mesure va à la partie perdante |
 
 ### 6.4 Grille d'annulation par défaut
