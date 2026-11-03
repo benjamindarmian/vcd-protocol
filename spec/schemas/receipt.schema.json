@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/vcd/0.1/receipt.schema.json",
+  "title": "VCD receipt v0.1 — reçu de livraison signé par un oracle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["spec_version", "suite_version", "receipt_id", "product", "min_class", "timing", "identity", "measurements", "thresholds", "verdict", "oracle", "hash", "signature"],
+  "properties": {
+    "spec_version": {"type": "string"},
+    "suite_version": {"type": "string"},
+    "receipt_id": {"type": "string"},
+    "contract_id": {"type": ["string", "null"]},
+    "purpose": {"type": "string", "enum": ["contract", "index", "calibration"]},
+    "product": {"type": "string"},
+    "min_class": {"type": "string", "enum": ["A", "B", "C"]},
+    "venue": {"type": ["string", "null"], "description": "fournisseur mesuré (pour une mesure d'indice)"},
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["measure_start", "measure_end"],
+      "properties": {
+        "order_ts": {"type": ["string", "null"], "format": "date-time"},
+        "access_ts": {"type": ["string", "null"], "format": "date-time"},
+        "delivery_delay_s": {"type": ["number", "null"]},
+        "measure_start": {"type": "string", "format": "date-time"},
+        "measure_end": {"type": "string", "format": "date-time"},
+        "mode": {"type": "string", "enum": ["full", "quick"]}
+      }
+    },
+    "identity": {
+      "type": "object",
+      "required": ["gpu_count", "gpus", "host"],
+      "properties": {
+        "gpu_count": {"type": "integer", "minimum": 0},
+        "family": {"type": ["string", "null"]},
+        "form": {"type": ["string", "null"]},
+        "nvlink_links_active": {"type": ["integer", "null"]},
+        "gpus": {"type": "array", "items": {"type": "object"}},
+        "host": {"type": "object"},
+        "driver_version": {"type": ["string", "null"]},
+        "cuda_version": {"type": ["string", "null"]},
+        "source": {"type": "string"}
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "properties": {
+        "compute": {"type": "object"},
+        "hbm": {"type": "object"},
+        "interconnect": {"type": "object"},
+        "network": {"type": "object"},
+        "storage": {"type": "object"},
+        "stability": {"type": "object"}
+      }
+    },
+    "thresholds": {"type": "object"},
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "conforming", "reasons"],
+      "properties": {
+        "class": {"type": "string", "enum": ["A", "B", "C", "FAIL"]},
+        "conforming": {"type": "boolean"},
+        "reasons": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "grades": {"type": "object", "description": "grade par mesure (A/B/C ou null si non mesurée)"}
+      }
+    },
+    "oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "public_key"],
+      "properties": {
+        "key_id": {"type": "string"},
+        "public_key": {"type": "string"},
+        "name": {"type": ["string", "null"]}
+      }
+    },
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "signature": {"type": ["string", "null"], "description": "signature ed25519 du hash, base64 ; null si l'oracle n'a pas pu signer (reçu non opposable)"}
+  }
+}

@@ -1,0 +1,495 @@
+{
+ "spec_version": "0.1.0",
+ "suite_version": "0.1.0",
+ "receipt_id": "rcpt-2026-11-27-exemple01",
+ "contract_id": "vcd-2026-11-27-000184",
+ "purpose": "contract",
+ "product": "H100.SXM.8",
+ "min_class": "A",
+ "venue": null,
+ "timing": {
+  "order_ts": "2026-11-27T07:58:12+00:00",
+  "access_ts": "2026-11-27T08:04:40+00:00",
+  "delivery_delay_s": 388,
+  "measure_start": "2026-11-27T08:04:45+00:00",
+  "measure_end": "2026-11-27T08:14:51+00:00",
+  "mode": "full"
+ },
+ "identity": {
+  "source": "nvml",
+  "gpu_count": 8,
+  "family": "H100",
+  "form": "SXM",
+  "nvlink_links_active": 144,
+  "driver_version": "550.90.07",
+  "cuda_version": "12.4",
+  "gpus": [
+   {
+    "index": 0,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-00",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 1,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-01",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 2,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-02",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 3,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-03",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 4,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-04",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 5,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-05",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 6,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-06",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   },
+   {
+    "index": 7,
+    "name": "NVIDIA H100 80GB HBM3",
+    "memory_gb": 79.6,
+    "uuid": "GPU-EXEMPLE-07",
+    "pcie_gen_max": 5,
+    "pcie_width_max": 16,
+    "power_limit_w": 700,
+    "ecc_enabled": true,
+    "mig_enabled": false,
+    "nvlink_links_active": 18
+   }
+  ],
+  "host": {
+   "hostname": "exemple-node-01",
+   "cpu_model": "AMD EPYC 9654 96-Core Processor",
+   "cpu_count": 192,
+   "ram_gb": 2015.4,
+   "disk": {
+    "total_gb": 7000.0,
+    "free_gb": 6500.0,
+    "path": "/workspace"
+   },
+   "kernel": "6.8.0",
+   "os": "Linux-6.8.0-x86_64",
+   "python": "3.11.9",
+   "virtualization": "bare-metal?:SYS-821GE-TNHR"
+  }
+ },
+ "measurements": {
+  "compute": {
+   "status": "ok",
+   "per_device": [
+    {
+     "device": 0,
+     "status": "ok",
+     "tflops": 612.4,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8350,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 1,
+     "status": "ok",
+     "tflops": 609.8,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8310,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 2,
+     "status": "ok",
+     "tflops": 615.1,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8390,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 3,
+     "status": "ok",
+     "tflops": 611.0,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8330,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 4,
+     "status": "ok",
+     "tflops": 608.2,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8290,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 5,
+     "status": "ok",
+     "tflops": 613.7,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8370,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 6,
+     "status": "ok",
+     "tflops": 610.5,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8320,
+     "dtype": "bfloat16"
+    },
+    {
+     "device": 7,
+     "status": "ok",
+     "tflops": 607.9,
+     "matrix": 8192,
+     "seconds": 15.0,
+     "iters": 8280,
+     "dtype": "bfloat16"
+    }
+   ],
+   "min_tflops": 607.9,
+   "mean_tflops": 611.1,
+   "max_tflops": 615.1,
+   "seconds_per_device": 15.0
+  },
+  "hbm": {
+   "status": "ok",
+   "per_device": [
+    {
+     "device": 0,
+     "status": "ok",
+     "gbs": 2894.1,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 1,
+     "status": "ok",
+     "gbs": 2901.3,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 2,
+     "status": "ok",
+     "gbs": 2888.7,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 3,
+     "status": "ok",
+     "gbs": 2897.0,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 4,
+     "status": "ok",
+     "gbs": 2890.2,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 5,
+     "status": "ok",
+     "gbs": 2899.8,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 6,
+     "status": "ok",
+     "gbs": 2893.5,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    },
+    {
+     "device": 7,
+     "status": "ok",
+     "gbs": 2886.9,
+     "buffer_bytes": 1073741824,
+     "iters": 6700,
+     "seconds": 5.0
+    }
+   ],
+   "min_gbs": 2886.9,
+   "mean_gbs": 2893.9
+  },
+  "interconnect": {
+   "status": "ok",
+   "busbw_gbs": 418.6,
+   "reason": null,
+   "allreduce": {
+    "status": "ok",
+    "algbw_gbs": 239.2,
+    "busbw_gbs": 418.6,
+    "bytes": 268435456,
+    "iters": 20,
+    "seconds": 0.0224,
+    "world": 8
+   },
+   "p2p": {
+    "status": "ok",
+    "gbs": 246.3,
+    "peer_access": true
+   }
+  },
+  "network": {
+   "status": "ok",
+   "endpoint": "https://speed.cloudflare.com/__down",
+   "latency_ms": 2.9,
+   "down_mbps": 4120.5,
+   "up_mbps": 2210.8
+  },
+  "storage": {
+   "status": "ok",
+   "path": "/workspace",
+   "bytes": 1073741824,
+   "write_mbs": 1912.4,
+   "read_cache_dropped": true,
+   "read_mbs": 3088.0
+  },
+  "stability": {
+   "status": "ok",
+   "seconds": 300.2,
+   "slice_seconds": 60.0,
+   "nvml": true,
+   "max_degradation_pct": 2.3,
+   "max_throttle_share": 0.0,
+   "per_device": [
+    {
+     "device": 0,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 1,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 2,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 3,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 4,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 5,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 6,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    },
+    {
+     "device": 7,
+     "tflops_first_slice": 608.0,
+     "tflops_last_slice": 594.0,
+     "degradation_pct": 2.3,
+     "samples": 150,
+     "max_temp_c": 71,
+     "min_sm_mhz": 1755,
+     "max_power_w": 688.0,
+     "throttle_share": 0.0,
+     "throttle_reasons": []
+    }
+   ]
+  }
+ },
+ "thresholds": {
+  "product": "H100.SXM.8",
+  "spec_version": "0.1.0",
+  "label": "Noeud de 8 x NVIDIA H100 SXM 80 GB, NVLink",
+  "identity": {
+   "family": "H100",
+   "form": "SXM",
+   "gpus": 8,
+   "min_mem_gb": 79,
+   "nvlink_required": true
+  },
+  "thresholds": {
+   "compute_tflops": {
+    "A": 550,
+    "B": 450
+   },
+   "hbm_gbs": {
+    "A": 2500,
+    "B": 2000
+   },
+   "interconnect_gbs": {
+    "A": 250,
+    "B": 100
+   },
+   "stability_max_degradation_pct": {
+    "A": 10,
+    "B": 20
+   },
+   "network_down_mbps": {
+    "A": 1000,
+    "B": 200
+   },
+   "storage_write_mbs": {
+    "A": 500,
+    "B": 150
+   }
+  }
+ },
+ "verdict": {
+  "class": "A",
+  "conforming": true,
+  "reasons": [
+   "toutes les mesures atteignent le seuil A"
+  ],
+  "warnings": [],
+  "grades": {
+   "compute": "A",
+   "hbm": "A",
+   "interconnect": "A",
+   "stability": "A",
+   "network": "A",
+   "storage": "A"
+  }
+ },
+ "oracle": {
+  "key_id": "oracle-d4074271dffd",
+  "public_key": "lYqubwvxAcE5idM/6RmnMV5lXp1iuWeJ8YGTJSmwSmc=",
+  "name": "EXEMPLE — mesures synthétiques, à des fins d'illustration"
+ },
+ "hash": "1b279248c5c0c5cdb306661b2f6b143d6594635359d41ba23daefdc6e64dd934",
+ "signature": "OAY6PiG7KRNs2XBVJQVGGSZiwM/jYxhZOJle/VmxzTKveywdrTF1sXI8AUV7DpmSvtS+06WJ/I2nmsTuzBmJCA=="
+}

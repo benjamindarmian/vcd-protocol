@@ -1,0 +1,29 @@
+{
+  "spec_version": "0.1.0",
+  "contract_id": "vcd-2026-11-27-000184",
+  "product": "H100.SXM.8",
+  "min_class": "A",
+  "quantity": 8,
+  "window": {"start": "2026-11-27T08:00:00Z", "end": "2026-11-28T04:00:00Z"},
+  "price_per_gpu_hour": 2.10,
+  "currency": "USD",
+  "notional": 2688.0,
+  "seller": {"id": "seller:host-eu-0042", "name": "Exemple Hébergeur SAS", "kyb_reference": "kyb-7781"},
+  "buyer": {"id": "buyer:team-finetune-19", "name": "Exemple Équipe IA"},
+  "collateral_pct": 20,
+  "delivery_deadline_minutes": 15,
+  "oracle": {
+    "key_id": "oracle-ref-01",
+    "public_key": "REMPLACER_PAR_LA_CLE_PUBLIQUE_ED25519_BASE64",
+    "suite_version_min": "0.1.0",
+    "backup_oracles": []
+  },
+  "cancellation": [
+    {"hours_before_start": 24, "refund_pct": 90},
+    {"hours_before_start": 0, "refund_pct": 75}
+  ],
+  "during_window_refund_pct": 60,
+  "fees": {"protocol_pct": 2.0, "oracle_pct": 0.5},
+  "transferable": false,
+  "metadata": {"region": "eu-west", "note": "64 GPU = 8 noeuds de 8, fenêtre de 20 heures"}
+}

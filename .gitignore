@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+receipts/
+.vcd_storage_*
+.pytest_cache/

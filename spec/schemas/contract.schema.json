@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/vcd/0.1/contract.schema.json",
+  "title": "VCD contract v0.1 — contrat de livraison vérifiable de compute",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["spec_version", "contract_id", "product", "min_class", "quantity", "window", "price_per_gpu_hour", "currency", "seller", "buyer", "collateral_pct", "delivery_deadline_minutes", "oracle", "transferable"],
+  "properties": {
+    "spec_version": {"type": "string", "pattern": "^0\\.1\\.[0-9]+$"},
+    "contract_id": {"type": "string", "minLength": 8},
+    "product": {"type": "string", "pattern": "^[A-Z0-9]+\\.(SXM|PCIE)\\.(1|8)$"},
+    "min_class": {"type": "string", "enum": ["A", "B", "C"]},
+    "quantity": {"type": "integer", "minimum": 1},
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "price_per_gpu_hour": {"type": "number", "minimum": 0},
+    "currency": {"type": "string", "enum": ["USD", "EUR", "USDC"]},
+    "notional": {"type": "number", "minimum": 0},
+    "seller": {"$ref": "#/$defs/party"},
+    "buyer": {"$ref": "#/$defs/party"},
+    "collateral_pct": {"type": "number", "minimum": 10, "maximum": 100},
+    "delivery_deadline_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+    "oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "public_key", "suite_version_min"],
+      "properties": {
+        "key_id": {"type": "string"},
+        "public_key": {"type": "string", "description": "clé publique ed25519, base64 (32 octets)"},
+        "suite_version_min": {"type": "string"},
+        "backup_oracles": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "cancellation": {
+      "type": "array",
+      "description": "grille de remboursement de l'acheteur ; chaque palier : remboursement en % si l'annulation survient au moins `hours_before_start` heures avant la fenêtre ; le palier `during_window_pct` s'applique pendant la fenêtre",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hours_before_start", "refund_pct"],
+        "properties": {
+          "hours_before_start": {"type": "number", "minimum": 0},
+          "refund_pct": {"type": "number", "minimum": 0, "maximum": 100}
+        }
+      }
+    },
+    "during_window_refund_pct": {"type": "number", "minimum": 0, "maximum": 100},
+    "fees": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "protocol_pct": {"type": "number", "minimum": 0},
+        "oracle_pct": {"type": "number", "minimum": 0}
+      }
+    },
+    "transferable": {"type": "boolean", "const": false},
+    "metadata": {"type": "object"}
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "description": "identifiant d'escrow ou clé publique"},
+        "name": {"type": "string"},
+        "kyb_reference": {"type": "string"}
+      }
+    }
+  }
+}

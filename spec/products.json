@@ -1,0 +1,141 @@
+{
+  "spec_version": "0.1.0",
+  "note": "Seuils PROVISOIRES. Ils sont calibrés sur les performances publiées et des mesures communautaires ; ils doivent être recalés sur des machines de référence mesurées avec cette suite avant toute utilisation contractuelle. Unités : compute en TFLOPS BF16 soutenus (matmul 8192x8192, accumulation FP32), hbm en GB/s, interconnect en GB/s de 'bus bandwidth' NCCL all-reduce, network en Mbit/s, storage en MB/s, stability en % de dégradation du débit de calcul entre la première et la dernière minute de charge.",
+  "grade_rule": {
+    "A": "toutes les mesures primaires (identity, compute, hbm, interconnect si applicable, stability) atteignent le seuil A ; les mesures secondaires (network, storage) atteignent le seuil A ou sont non mesurées",
+    "B": "identité conforme ; toutes les mesures primaires atteignent au moins le seuil B",
+    "C": "identité conforme ; au moins une mesure primaire sous le seuil B",
+    "FAIL": "identité non conforme (famille, forme, nombre de GPU ou mémoire), machine inaccessible, ou suite interrompue"
+  },
+  "products": {
+    "H100.SXM.8": {
+      "label": "Noeud de 8 x NVIDIA H100 SXM 80 GB, NVLink",
+      "identity": {"family": "H100", "form": "SXM", "gpus": 8, "min_mem_gb": 79, "nvlink_required": true},
+      "thresholds": {
+        "compute_tflops": {"A": 550, "B": 450},
+        "hbm_gbs": {"A": 2500, "B": 2000},
+        "interconnect_gbs": {"A": 250, "B": 100},
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 1000, "B": 200},
+        "storage_write_mbs": {"A": 500, "B": 150}
+      }
+    },
+    "H100.SXM.1": {
+      "label": "1 x NVIDIA H100 SXM 80 GB",
+      "identity": {"family": "H100", "form": "SXM", "gpus": 1, "min_mem_gb": 79, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 550, "B": 450},
+        "hbm_gbs": {"A": 2500, "B": 2000},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 500, "B": 100},
+        "storage_write_mbs": {"A": 300, "B": 100}
+      }
+    },
+    "H100.PCIE.1": {
+      "label": "1 x NVIDIA H100 PCIe 80 GB",
+      "identity": {"family": "H100", "form": "PCIE", "gpus": 1, "min_mem_gb": 79, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 450, "B": 350},
+        "hbm_gbs": {"A": 1600, "B": 1300},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 500, "B": 100},
+        "storage_write_mbs": {"A": 300, "B": 100}
+      }
+    },
+    "H200.SXM.8": {
+      "label": "Noeud de 8 x NVIDIA H200 SXM 141 GB, NVLink",
+      "identity": {"family": "H200", "form": "SXM", "gpus": 8, "min_mem_gb": 140, "nvlink_required": true},
+      "thresholds": {
+        "compute_tflops": {"A": 550, "B": 450},
+        "hbm_gbs": {"A": 3600, "B": 2800},
+        "interconnect_gbs": {"A": 250, "B": 100},
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 1000, "B": 200},
+        "storage_write_mbs": {"A": 500, "B": 150}
+      }
+    },
+    "B200.SXM.8": {
+      "label": "Noeud de 8 x NVIDIA B200 SXM 180 GB, NVLink",
+      "identity": {"family": "B200", "form": "SXM", "gpus": 8, "min_mem_gb": 175, "nvlink_required": true},
+      "thresholds": {
+        "compute_tflops": {"A": 1200, "B": 900},
+        "hbm_gbs": {"A": 5500, "B": 4000},
+        "interconnect_gbs": {"A": 500, "B": 200},
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 1000, "B": 200},
+        "storage_write_mbs": {"A": 500, "B": 150}
+      }
+    },
+    "A100.SXM.8": {
+      "label": "Noeud de 8 x NVIDIA A100 SXM 80 GB, NVLink",
+      "identity": {"family": "A100", "form": "SXM", "gpus": 8, "min_mem_gb": 79, "nvlink_required": true},
+      "thresholds": {
+        "compute_tflops": {"A": 220, "B": 170},
+        "hbm_gbs": {"A": 1500, "B": 1200},
+        "interconnect_gbs": {"A": 150, "B": 60},
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 1000, "B": 200},
+        "storage_write_mbs": {"A": 500, "B": 150}
+      }
+    },
+    "A100.SXM.1": {
+      "label": "1 x NVIDIA A100 SXM 80 GB",
+      "identity": {"family": "A100", "form": "SXM", "gpus": 1, "min_mem_gb": 79, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 220, "B": 170},
+        "hbm_gbs": {"A": 1500, "B": 1200},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 10, "B": 20},
+        "network_down_mbps": {"A": 500, "B": 100},
+        "storage_write_mbs": {"A": 300, "B": 100}
+      }
+    },
+    "RTX4090.PCIE.1": {
+      "label": "1 x NVIDIA GeForce RTX 4090 24 GB",
+      "identity": {"family": "RTX4090", "form": "PCIE", "gpus": 1, "min_mem_gb": 23, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 70, "B": 50},
+        "hbm_gbs": {"A": 800, "B": 600},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 10, "B": 25},
+        "network_down_mbps": {"A": 300, "B": 50},
+        "storage_write_mbs": {"A": 300, "B": 100}
+      }
+    },
+    "T4.PCIE.1": {
+      "label": "1 x NVIDIA Tesla T4 16 GB (produit de calibration, GPU gratuits Kaggle/Colab)",
+      "identity": {"family": "T4", "form": "PCIE", "gpus": 1, "min_mem_gb": 14, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 20, "B": 12},
+        "hbm_gbs": {"A": 220, "B": 150},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 15, "B": 30},
+        "network_down_mbps": {"A": 100, "B": 20},
+        "storage_write_mbs": {"A": 100, "B": 30}
+      }
+    },
+    "P100.PCIE.1": {
+      "label": "1 x NVIDIA Tesla P100 16 GB (produit de calibration, GPU gratuits Kaggle)",
+      "identity": {"family": "P100", "form": "PCIE", "gpus": 1, "min_mem_gb": 15, "nvlink_required": false},
+      "thresholds": {
+        "compute_tflops": {"A": 8, "B": 5},
+        "hbm_gbs": {"A": 450, "B": 300},
+        "interconnect_gbs": null,
+        "stability_max_degradation_pct": {"A": 15, "B": 30},
+        "network_down_mbps": {"A": 100, "B": 20},
+        "storage_write_mbs": {"A": 100, "B": 30}
+      }
+    }
+  },
+  "family_aliases": {
+    "H100": ["H100", "H100 80GB", "H100 SXM", "H100 PCIe", "H100 NVL", "HBM3"],
+    "H200": ["H200"],
+    "B200": ["B200"],
+    "A100": ["A100"],
+    "RTX4090": ["RTX 4090", "4090"],
+    "T4": ["Tesla T4", "T4"],
+    "P100": ["Tesla P100", "P100"]
+  }
+}
