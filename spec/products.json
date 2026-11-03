@@ -1,6 +1,6 @@
 {
   "spec_version": "0.1.0",
-  "note": "Seuils PROVISOIRES. Ils sont calibrés sur les performances publiées et des mesures communautaires ; ils doivent être recalés sur des machines de référence mesurées avec cette suite avant toute utilisation contractuelle. Unités : compute en TFLOPS BF16 soutenus (matmul 8192x8192, accumulation FP32), hbm en GB/s, interconnect en GB/s de 'bus bandwidth' NCCL all-reduce, network en Mbit/s, storage en MB/s, stability en % de dégradation du débit de calcul entre la première et la dernière minute de charge.",
+  "note": "Seuils PROVISOIRES. Ils sont calibrés sur les performances publiées et des mesures communautaires ; ils doivent être recalés sur des machines de référence mesurées avec cette suite avant toute utilisation contractuelle. Unités : compute en TFLOPS soutenus (matmul 8192x8192, accumulation FP32) en BF16 sur les GPU qui le calculent nativement (capacité CUDA >= 8.0 : A100, H100, H200, B200, RTX 4090) et en FP16 sur les plus anciens (T4, P100), ce que le reçu indique, hbm en GB/s, interconnect en GB/s de 'bus bandwidth' NCCL all-reduce, network en Mbit/s, storage en MB/s, stability en % de dégradation du débit de calcul entre la première et la dernière minute de charge.",
   "grade_rule": {
     "A": "toutes les mesures primaires (identity, compute, hbm, interconnect si applicable, stability) atteignent le seuil A ; les mesures secondaires (network, storage) atteignent le seuil A ou sont non mesurées",
     "B": "identité conforme ; toutes les mesures primaires atteignent au moins le seuil B",

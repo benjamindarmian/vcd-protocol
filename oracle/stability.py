@@ -16,13 +16,17 @@ THROTTLE_MASKS = {
     "hw_power_brake": 0x80,
 }
 BAD_MASK = sum(THROTTLE_MASKS.values())
+# Le plafond de puissance logiciel (sw_power_cap) est le point de fonctionnement normal d'un GPU à son TDP ;
+# seuls les ralentissements thermiques et matériels comptent contre la classe.
+THERMAL_MASK = THROTTLE_MASKS["hw_slowdown"] | THROTTLE_MASKS["sw_thermal"] | THROTTLE_MASKS["hw_thermal"] | THROTTLE_MASKS["hw_power_brake"]
 
 
 def _load_worker(torch, index: int, n: int, stop: threading.Event, log: list, lock: threading.Lock):
     dev = torch.device(f"cuda:{index}")
     try:
         with torch.cuda.device(dev):
-            dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+            from .compute import matmul_dtype
+            dtype = matmul_dtype(torch, index)
             size = n
             while True:
                 try:
@@ -132,7 +136,9 @@ def measure_stability(seconds: float = 300.0, sample_every: float = 2.0, n: int 
         last = tflops_between(t_end - slice_len, t_end)
         deg = max(0.0, (first - last) / first * 100) if first > 0 else None
         s = [r for r in samples if r["device"] == i]
-        thr = [r.get("throttle_mask", 0) & BAD_MASK for r in s if "throttle_mask" in r]
+        masks = [r.get("throttle_mask", 0) for r in s if "throttle_mask" in r]
+        thr = [m & BAD_MASK for m in masks]
+        therm = [m & THERMAL_MASK for m in masks]
         d = {
             "device": i,
             "tflops_first_slice": round(first, 1),
@@ -143,6 +149,8 @@ def measure_stability(seconds: float = 300.0, sample_every: float = 2.0, n: int 
             "min_sm_mhz": min((r["sm_mhz"] for r in s if "sm_mhz" in r), default=None),
             "max_power_w": max((r["power_w"] for r in s if "power_w" in r), default=None),
             "throttle_share": round(sum(1 for m in thr if m) / len(thr), 3) if thr else None,
+            "thermal_share": round(sum(1 for m in therm if m) / len(therm), 3) if therm else None,
+            "power_cap_share": round(sum(1 for m in masks if m & THROTTLE_MASKS["sw_power_cap"]) / len(masks), 3) if masks else None,
             "throttle_reasons": sorted({name for m in thr for name, bit in THROTTLE_MASKS.items() if m & bit}),
         }
         if err:
@@ -150,6 +158,8 @@ def measure_stability(seconds: float = 300.0, sample_every: float = 2.0, n: int 
         per_device.append(d)
     degs = [d["degradation_pct"] for d in per_device if d["degradation_pct"] is not None]
     shares = [d["throttle_share"] for d in per_device if d["throttle_share"] is not None]
+    therms = [d["thermal_share"] for d in per_device if d["thermal_share"] is not None]
+    caps = [d["power_cap_share"] for d in per_device if d["power_cap_share"] is not None]
     return {
         "status": "ok" if degs else "error",
         "seconds": round(total, 1),
@@ -157,5 +167,7 @@ def measure_stability(seconds: float = 300.0, sample_every: float = 2.0, n: int 
         "per_device": per_device,
         "max_degradation_pct": max(degs) if degs else None,
         "max_throttle_share": max(shares) if shares else None,
+        "max_thermal_share": max(therms) if therms else None,
+        "max_power_cap_share": max(caps) if caps else None,
         "nvml": pynvml is not None,
     }

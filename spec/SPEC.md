@@ -35,7 +35,7 @@ Un produit est identifié par `FAMILLE.FORME.NOMBRE` : la famille de GPU (`H100`
 Les produits et leurs seuils sont dans `products.json`. Pour chaque produit :
 
 - **identité** : famille, forme, nombre de GPU, mémoire minimale par GPU, NVLink requis ou non ;
-- **seuils de travail**, chacun avec une valeur A et une valeur B : calcul soutenu (TFLOPS BF16), bande passante mémoire (GB/s), interconnexion (GB/s de bande passante de bus en all-reduce), stabilité (dégradation maximale en % sur la durée de charge), réseau (Mbit/s descendant), stockage (MB/s en écriture).
+- **seuils de travail**, chacun avec une valeur A et une valeur B : calcul soutenu (TFLOPS en BF16, ou FP16 sur les GPU sans BF16 natif, ce que le reçu précise), bande passante mémoire (GB/s), interconnexion (GB/s de bande passante de bus en all-reduce), stabilité (dégradation maximale en % sur la durée de charge), réseau (Mbit/s descendant), stockage (MB/s en écriture).
 
 Les seuils de la v0.1 sont **provisoires** : ils viennent des performances publiées et de mesures communautaires. Ils doivent être recalés sur des machines de référence mesurées avec la suite elle-même avant d'être opposables. Toute modification de seuil incrémente la version mineure de la spécification et s'applique seulement aux contrats conclus après publication.
 

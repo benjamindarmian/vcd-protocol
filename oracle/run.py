@@ -40,12 +40,13 @@ def _print_summary(receipt: dict):
     def val(d, k, unit=""):
         x = d.get(k) if isinstance(d, dict) else None
         return f"{x} {unit}".strip() if x is not None else f"n/a ({(d or {}).get('reason') or (d or {}).get('status')})"
-    print(f"calcul          : {val(m.get('compute'), 'min_tflops', 'TFLOPS (GPU le plus lent)')} | moyenne {m.get('compute', {}).get('mean_tflops')}")
+    dtypes = sorted({d.get("dtype") for d in m.get("compute", {}).get("per_device", []) if d.get("dtype")})
+    print(f"calcul          : {val(m.get('compute'), 'min_tflops', 'TFLOPS (GPU le plus lent)')} | moyenne {m.get('compute', {}).get('mean_tflops')} | {', '.join(dtypes) or '-'}")
     print(f"mémoire HBM     : {val(m.get('hbm'), 'min_gbs', 'GB/s')}")
     print(f"interconnexion  : {val(m.get('interconnect'), 'busbw_gbs', 'GB/s busbw all-reduce')}")
     print(f"réseau          : {val(m.get('network'), 'down_mbps', 'Mbit/s desc.')} | montant {m.get('network', {}).get('up_mbps')} | latence {m.get('network', {}).get('latency_ms')} ms")
     print(f"stockage        : {val(m.get('storage'), 'write_mbs', 'MB/s écriture')} | lecture {m.get('storage', {}).get('read_mbs')}")
-    print(f"stabilité       : {val(m.get('stability'), 'max_degradation_pct', '% de dégradation')} | bridage {m.get('stability', {}).get('max_throttle_share')}")
+    print(f"stabilité       : {val(m.get('stability'), 'max_degradation_pct', '% de dégradation')} | ralentissement thermique {m.get('stability', {}).get('max_thermal_share')} | plafond de puissance {m.get('stability', {}).get('max_power_cap_share')}")
     t = receipt["timing"]
     if t.get("delivery_delay_s") is not None:
         print(f"livraison       : {t['delivery_delay_s']} s entre commande et accès")

@@ -35,7 +35,7 @@ def good_measurements():
         "interconnect": {"status": "ok", "busbw_gbs": 412.0, "allreduce": {}, "p2p": {}},
         "network": {"status": "ok", "down_mbps": 4100.0, "up_mbps": 2200.0, "latency_ms": 3.1},
         "storage": {"status": "ok", "write_mbs": 1900.0, "read_mbs": 3100.0},
-        "stability": {"status": "ok", "max_degradation_pct": 2.4, "max_throttle_share": 0.0, "per_device": []},
+        "stability": {"status": "ok", "max_degradation_pct": 2.4, "max_throttle_share": 0.0, "max_thermal_share": 0.0, "max_power_cap_share": 0.0, "per_device": []},
     }
 
 
@@ -97,12 +97,21 @@ def test_unmeasured_primary_gives_c():
     assert v["class"] == "C"
 
 
-def test_throttling_caps_stability_at_b():
+def test_thermal_throttling_caps_stability_at_b():
     m = good_measurements()
-    m["stability"]["max_throttle_share"] = 0.6
+    m["stability"]["max_thermal_share"] = 0.6
     v = compute_verdict("H100.SXM.8", PRODUCTS, h100_node_identity(), m, "A")
     assert v["class"] == "B"
-    assert any("bridage" in r for r in v["reasons"])
+    assert any("thermique" in r for r in v["reasons"])
+
+
+def test_power_cap_is_normal_and_keeps_class_a():
+    m = good_measurements()
+    m["stability"]["max_power_cap_share"] = 0.93  # un GPU à son TDP, comme un T4 sous charge
+    m["stability"]["max_throttle_share"] = 0.93
+    v = compute_verdict("H100.SXM.8", PRODUCTS, h100_node_identity(), m, "A")
+    assert v["class"] == "A"
+    assert any("plafond de puissance" in w for w in v["warnings"])
 
 
 def test_single_gpu_product_ignores_interconnect():

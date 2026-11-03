@@ -83,10 +83,13 @@ def compute_verdict(product_key: str, products: dict, identity: dict, measuremen
         reasons.append("stabilité : non mesurée")
     elif grades["stability"] != "A":
         reasons.append(f"stabilité : dégradation {st.get('max_degradation_pct')} % sous charge, seuil A {th['stability_max_degradation_pct']['A']} %")
-    share = st.get("max_throttle_share")
+    share = st.get("max_thermal_share")
     if share is not None and share > 0.2 and grades["stability"] == "A":
         grades["stability"] = "B"
-        reasons.append(f"stabilité : bridage thermique ou de puissance sur {round(share * 100)} % des échantillons")
+        reasons.append(f"stabilité : ralentissement thermique ou matériel sur {round(share * 100)} % des échantillons")
+    cap = st.get("max_power_cap_share")
+    if cap is not None and cap > 0.5:
+        warnings.append(f"stabilité : GPU à son plafond de puissance sur {round(cap * 100)} % des échantillons (fonctionnement normal au TDP, sans effet sur la classe)")
 
     primary_grades = [g if g is not None else "C" for k, g in grades.items() if k in PRIMARY]
     cls = _min_class(primary_grades)

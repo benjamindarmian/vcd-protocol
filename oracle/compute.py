@@ -28,17 +28,22 @@ def _matmul_loop(torch, dev, n: int, seconds: float, dtype) -> dict:
     return {"tflops": round(flops / elapsed / 1e12, 1), "matrix": n, "seconds": round(elapsed, 2), "iters": iters}
 
 
+def matmul_dtype(torch, index: int):
+    """BF16 seulement si le GPU le calcule nativement (Ampere et plus, capacité >= 8.0) ;
+    sinon FP16 : sur Turing/Volta/Pascal, torch émule le BF16 et divise le débit par dix."""
+    try:
+        major, _ = torch.cuda.get_device_capability(index)
+    except Exception:
+        major = 8
+    return torch.bfloat16 if major >= 8 else torch.float16
+
+
 def measure_compute_device(index: int, seconds: float = 15.0) -> dict:
     torch = try_torch()
     if torch is None or not torch.cuda.is_available():
         return {"device": index, "status": "n/a", "reason": "CUDA indisponible"}
     dev = torch.device(f"cuda:{index}")
-    dtype = torch.bfloat16
-    try:
-        if not torch.cuda.is_bf16_supported():
-            dtype = torch.float16
-    except Exception:
-        pass
+    dtype = matmul_dtype(torch, index)
     for n in (8192, 4096, 2048):
         try:
             with torch.cuda.device(dev):
