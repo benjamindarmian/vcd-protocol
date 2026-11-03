@@ -55,7 +55,7 @@ def receipt_hash(receipt: dict) -> str:
 def build_receipt(*, product: str, min_class: str, identity: dict, measurements: dict, thresholds: dict, verdict: dict,
                   timing: dict, purpose: str = "contract", contract_id: str | None = None, venue: str | None = None,
                   key_file: Path = DEFAULT_KEY_FILE, sign: bool = True, oracle_name: str | None = None,
-                  nonce: str | None = None) -> dict:
+                  nonce: str | None = None, measurements_first: dict | None = None) -> dict:
     """Construit un reçu. Avec sign=False, le résultat est un *lot de mesures* non signé : c'est ce que produit la
     machine mesurée ; la signature est apposée ensuite par le contrôleur de l'oracle (sign_bundle), qui seul détient la clé."""
     priv, pub_b64, key_id = (None, None, None)
@@ -74,6 +74,7 @@ def build_receipt(*, product: str, min_class: str, identity: dict, measurements:
         "timing": timing,
         "identity": identity,
         "measurements": measurements,
+        "measurements_first": measurements_first,
         "thresholds": thresholds,
         "verdict": verdict,
         "oracle": {"key_id": key_id or "unsigned", "public_key": pub_b64 or "", "name": oracle_name},

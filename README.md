@@ -18,7 +18,9 @@ is in French for now; an English translation is planned. Specification: CC BY 4.
 | `spec/products.json` | les produits et leurs seuils (provisoires, à calibrer) |
 | `spec/schemas/` | schémas JSON du contrat et du reçu |
 | `spec/examples/` | un contrat d'exemple et un reçu signé d'exemple (mesures synthétiques) |
-| `oracle/` | la suite de conformité : identité, calcul, mémoire, interconnexion, réseau, stockage, stabilité, verdict, reçu signé |
+| `oracle/` | la suite de conformité : identité, calcul, mémoire, interconnexion, réseau, stockage, stabilité, verdict, reçu ; `oracle.sign` : contrôleur qui vérifie les compteurs bruts et signe |
+| `settlement/` | la boucle de règlement v0 : états du contrat, flux d'argent, journal public à chaîne de hachage |
+| `calibration/` | journal des mesures de référence et des décisions de seuil |
 | `notebooks/` | calibration de la suite sur un GPU gratuit (Kaggle, Colab) |
 | `scripts/run_oracle_remote.sh` | lancer la suite sur une machine fraîchement livrée |
 | `tests/` | tests hors GPU : règle de classe, falsification de reçu, schémas, bout en bout |

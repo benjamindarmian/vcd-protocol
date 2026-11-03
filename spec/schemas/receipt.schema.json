@@ -281,6 +281,13 @@
         "null"
       ],
       "description": "résultat des contrôles de cohérence du contrôleur (recalcul des débits et du verdict)"
+    },
+    "measurements_first": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "premier passage lorsque une contre-mesure a été effectuée (spec §2 règle 3) ; le verdict porte sur `measurements`"
     }
   }
 }

@@ -3,3 +3,4 @@ __pycache__/
 receipts/
 .vcd_storage_*
 .pytest_cache/
+ledger/

@@ -17,7 +17,7 @@ from pathlib import Path
 from .util import cuda_available, load_products, now_iso
 from .identity import collect_identity, guess_product
 from .receipt import build_receipt, verify_receipt
-from .verdict import compute_verdict
+from .verdict import CLASS_ORDER, compute_verdict
 
 STEPS = ("compute", "hbm", "interconnect", "network", "storage", "stability")
 
@@ -77,6 +77,7 @@ def main(argv=None) -> int:
     ap.add_argument("--no-sign", action="store_true", help="produire un lot de mesures non signé (à signer par le contrôleur : python -m oracle.sign)")
     ap.add_argument("--nonce", default=os.environ.get("VCD_NONCE"), help="défi fourni par le contrôleur ; implique --no-sign")
     ap.add_argument("--no-jitter", action="store_true", help="durées fixes (par défaut : durées tirées au hasard à ±20 %%)")
+    ap.add_argument("--no-countermeasure", action="store_true", help="ne pas relancer les mesures primaires avant un verdict non conforme (spec §2 règle 3)")
     ap.add_argument("--oracle-name", default=os.environ.get("VCD_ORACLE_NAME"))
     ap.add_argument("--json", action="store_true", help="imprimer le reçu complet sur stdout")
     args = ap.parse_args(argv)
@@ -155,6 +156,18 @@ def main(argv=None) -> int:
         measurements["stability"] = {"status": "n/a", "reason": "pas de GPU CUDA"}
 
     verdict = compute_verdict(product, products, identity, measurements, min_class)
+    measurements_first = None
+    primaries_below = [k for k in ("compute", "hbm", "interconnect", "stability") if verdict.get("grades", {}).get(k) in ("B", "C")]
+    if (has_gpu and not args.no_countermeasure and not verdict["conforming"] and verdict["class"] != "FAIL"
+            and primaries_below and any(CLASS_ORDER[verdict["grades"][k]] < CLASS_ORDER[min_class] for k in primaries_below)):
+        print(f"[contre-mesure] mesures primaires sous le seuil ({', '.join(primaries_below)}) : second passage avant verdict", file=sys.stderr, flush=True)
+        measurements_first = json.loads(json.dumps(measurements))
+        step("compute", lambda: measure_compute(seconds=cs))
+        step("hbm", lambda: measure_hbm(seconds=2.0 if quick else 5.0))
+        step("interconnect", lambda: measure_interconnect(quick=quick))
+        step("stability", lambda: measure_stability(seconds=ss, sample_every=2.0))
+        verdict = compute_verdict(product, products, identity, measurements, min_class)
+        verdict["warnings"].append("contre-mesure effectuée : le verdict porte sur le second passage, le premier est conservé dans measurements_first")
     if not has_gpu:
         verdict["warnings"].append("exécution sans GPU (--allow-cpu) : reçu de validation, non opposable")
     timing = {
@@ -169,7 +182,8 @@ def main(argv=None) -> int:
     receipt = build_receipt(product=product, min_class=min_class, identity=identity, measurements=measurements,
                             thresholds=thresholds, verdict=verdict, timing=timing, purpose=purpose,
                             contract_id=(contract or {}).get("contract_id"), venue=args.venue,
-                            sign=sign, oracle_name=args.oracle_name, nonce=args.nonce)
+                            sign=sign, oracle_name=args.oracle_name, nonce=args.nonce,
+                            measurements_first=measurements_first)
     out = Path(args.out) if args.out else Path("receipts") / f"{receipt['receipt_id']}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
