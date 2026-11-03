@@ -56,11 +56,26 @@ def compute_verdict(product_key: str, products: dict, identity: dict, measuremen
     # 2. Mesures primaires
     grades: dict[str, str | None] = {}
     comp = measurements.get("compute", {})
-    grades["compute"] = _grade(comp.get("min_tflops"), th["compute_tflops"])
+    st0 = measurements.get("stability", {}) or {}
+    sustained = [d.get("tflops_last_slice") for d in st0.get("per_device", []) if d.get("tflops_last_slice")]
+    long_load = st0.get("status") == "ok" and (st0.get("seconds") or 0) >= 120 and sustained
+    if long_load:
+        # Cinq minutes de charge valent mieux que quinze secondes : la valeur notée est le régime établi de la phase de stabilité
+        compute_value, compute_src = min(sustained), f"régime établi sur {round(st0.get('seconds'))} s de charge"
+    else:
+        compute_value, compute_src = comp.get("min_tflops"), "fenêtre courte"
+    grades["compute"] = _grade(compute_value, th["compute_tflops"])
     if grades["compute"] is None:
         reasons.append("calcul : non mesuré")
     elif grades["compute"] != "A":
-        reasons.append(f"calcul : {comp.get('min_tflops')} TFLOPS (GPU le plus lent), seuil A {th['compute_tflops']['A']}")
+        reasons.append(f"calcul : {compute_value} TFLOPS (GPU le plus lent, {compute_src}), seuil A {th['compute_tflops']['A']}")
+    elif long_load and comp.get("min_tflops") is not None and comp["min_tflops"] < compute_value * 0.85:
+        warnings.append(f"calcul : fenêtre courte à {comp['min_tflops']} TFLOPS contre {compute_value} en régime établi ; la valeur longue est retenue")
+    # Sonde anti-ciblage : un écart anormal entre la taille aléatoire et la taille notée est signalé
+    for pr in comp.get("probe", []) or []:
+        base = next((d.get("tflops") for d in comp.get("per_device", []) if d.get("device") == pr.get("device")), None)
+        if pr.get("status") == "ok" and base and pr.get("tflops") and (pr["tflops"] < 0.6 * base or pr["tflops"] > 1.4 * base):
+            warnings.append(f"calcul : sonde de taille aléatoire ({pr.get('matrix')}) à {pr.get('tflops')} TFLOPS contre {base} à 8192 : écart anormal, à vérifier")
 
     hbm = measurements.get("hbm", {})
     grades["hbm"] = _grade(hbm.get("min_gbs"), th["hbm_gbs"])

@@ -163,7 +163,7 @@ bornes publiées, de sorte qu'un vendeur ne puisse pas reconnaître la mesure et
 que celle livrée au client. Pour un contrat, l'oracle mesure la machine exactement livrée à l'acheteur, avec les
 identifiants de l'acheteur. Les reçus d'un oracle sont auditables dans le journal ; un oracle dont les reçus sont contredits par des contre-mesures perd son agrément.
 
-La suite de conformité de référence est décrite dans `oracle/README.md`. Elle dure environ dix minutes en mode complet (cinq minutes de charge de stabilité) et deux minutes en mode rapide. Seul le mode complet fait foi pour un contrat et pour la calibration d'un seuil ; le mode rapide vérifie l'identité et l'accès. La mesure de calcul exclut la montée en charge initiale (boost d'horloge) et ne compte que le régime établi.
+La suite de conformité de référence est décrite dans `oracle/README.md`. Elle dure environ dix minutes en mode complet (cinq minutes de charge de stabilité) et deux minutes en mode rapide. Seul le mode complet fait foi pour un contrat et pour la calibration d'un seuil ; le mode rapide vérifie l'identité et l'accès. La mesure de calcul exclut la montée en charge initiale (boost d'horloge) et ne compte que le régime établi ; en mode complet, la valeur notée est le débit soutenu pendant la phase de charge de cinq minutes, tous GPU chargés simultanément, et la fenêtre courte n'est qu'indicative.
 
 ## 8. Ce que la v0.1 ne couvre pas
 

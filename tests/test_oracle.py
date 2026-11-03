@@ -114,6 +114,30 @@ def test_power_cap_is_normal_and_keeps_class_a():
     assert any("plafond de puissance" in w for w in v["warnings"])
 
 
+def test_full_mode_grades_compute_on_sustained_load():
+    m = good_measurements()
+    m["compute"]["min_tflops"] = 430.0  # fenêtre courte médiocre
+    m["stability"]["seconds"] = 300.0
+    m["stability"]["per_device"] = [{"device": i, "tflops_first_slice": 600.0, "tflops_last_slice": 590.0, "degradation_pct": 1.7} for i in range(8)]
+    v = compute_verdict("H100.SXM.8", PRODUCTS, h100_node_identity(), m, "A")
+    assert v["class"] == "A"
+    assert any("fenêtre courte" in w for w in v["warnings"])
+    # sans phase longue, la fenêtre courte fait foi
+    m["stability"]["seconds"] = 30.0
+    v2 = compute_verdict("H100.SXM.8", PRODUCTS, h100_node_identity(), m, "A")
+    assert v2["class"] == "C"
+
+
+def test_random_size_probe_anomaly_is_flagged():
+    m = good_measurements()
+    m["compute"]["per_device"] = [{"device": 0, "status": "ok", "tflops": 612.0}]
+    m["compute"]["probe"] = [{"device": 0, "status": "ok", "tflops": 300.0, "matrix": 7168}]
+    ident = h100_node_identity(n=1, nvlink=0)
+    m["interconnect"] = {"status": "n/a"}
+    v = compute_verdict("H100.SXM.1", PRODUCTS, ident, m, "A")
+    assert any("sonde" in w for w in v["warnings"])
+
+
 def test_single_gpu_product_ignores_interconnect():
     ident = h100_node_identity(n=1, nvlink=0)
     m = good_measurements()

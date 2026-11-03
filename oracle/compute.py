@@ -55,9 +55,7 @@ def measure_compute_device(index: int, seconds: float = 15.0) -> dict:
         return {"device": index, "status": "n/a", "reason": "CUDA indisponible"}
     dev = torch.device(f"cuda:{index}")
     dtype = matmul_dtype(torch, index)
-    import os, random
-    first = 8192 if os.environ.get("VCD_FIXED_SIZES") else random.choice((7936, 8192, 8448))
-    for n in (first, 4096, 2048):
+    for n in (8192, 4096, 2048):
         try:
             with torch.cuda.device(dev):
                 r = _matmul_loop(torch, dev, n, seconds, dtype)
@@ -72,18 +70,40 @@ def measure_compute_device(index: int, seconds: float = 15.0) -> dict:
     return {"device": index, "status": "error", "reason": "OOM même en 2048"}
 
 
-def measure_compute(seconds: float = 15.0, devices: list[int] | None = None) -> dict:
+def probe_random_size(index: int, seconds: float = 3.0) -> dict:
+    """Sonde anti-ciblage, NON notée : une taille de matrice tirée au hasard. Son débit doit rester proche de la
+    mesure notée à 8192 ; un écart anormal signale une machine qui reconnaît le test."""
+    import random
+    torch = try_torch()
+    if torch is None or not torch.cuda.is_available():
+        return {"status": "n/a"}
+    n = random.choice((6144, 7168, 7680, 8704, 9216))
+    dev = torch.device(f"cuda:{index}")
+    try:
+        with torch.cuda.device(dev):
+            r = _matmul_loop(torch, dev, n, seconds, matmul_dtype(torch, index))
+        r.update({"device": index, "status": "ok"})
+        return r
+    except Exception as e:
+        return {"device": index, "status": "error", "reason": str(e)[:160]}
+
+
+def measure_compute(seconds: float = 15.0, devices: list[int] | None = None, probe: bool = True) -> dict:
     torch = try_torch()
     if torch is None or not torch.cuda.is_available():
         return {"status": "n/a", "reason": "CUDA indisponible", "per_device": []}
     devices = devices if devices is not None else list(range(torch.cuda.device_count()))
     per = [measure_compute_device(i, seconds) for i in devices]
     vals = [p["tflops"] for p in per if p.get("status") == "ok"]
-    return {
+    out = {
         "status": "ok" if vals else "error",
         "per_device": per,
         "min_tflops": min(vals) if vals else None,
         "mean_tflops": round(sum(vals) / len(vals), 1) if vals else None,
         "max_tflops": max(vals) if vals else None,
         "seconds_per_device": seconds,
+        "matrix": 8192,
     }
+    if probe and vals:
+        out["probe"] = [probe_random_size(i) for i in devices]
+    return out
