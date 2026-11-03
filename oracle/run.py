@@ -74,7 +74,9 @@ def main(argv=None) -> int:
     ap.add_argument("--access-ts", help="heure d'accès effectif ISO 8601 (défaut : maintenant)")
     ap.add_argument("--out", help="chemin du reçu JSON (défaut : receipts/<receipt_id>.json)")
     ap.add_argument("--allow-cpu", action="store_true", help="exécuter sans GPU (identité, réseau, stockage ; verdict FAIL)")
-    ap.add_argument("--no-sign", action="store_true")
+    ap.add_argument("--no-sign", action="store_true", help="produire un lot de mesures non signé (à signer par le contrôleur : python -m oracle.sign)")
+    ap.add_argument("--nonce", default=os.environ.get("VCD_NONCE"), help="défi fourni par le contrôleur ; implique --no-sign")
+    ap.add_argument("--no-jitter", action="store_true", help="durées fixes (par défaut : durées tirées au hasard à ±20 %%)")
     ap.add_argument("--oracle-name", default=os.environ.get("VCD_ORACLE_NAME"))
     ap.add_argument("--json", action="store_true", help="imprimer le reçu complet sur stdout")
     args = ap.parse_args(argv)
@@ -115,8 +117,11 @@ def main(argv=None) -> int:
         return 3
 
     measurements: dict = {}
-    cs = args.compute_seconds or (5.0 if quick else 15.0)
-    ss = args.stability_seconds or (30.0 if quick else 300.0)
+    import random
+    jit = (lambda x: x) if args.no_jitter else (lambda x: round(x * random.uniform(0.8, 1.2), 1))
+    cs = args.compute_seconds or jit(5.0 if quick else 15.0)
+    ss = args.stability_seconds or jit(30.0 if quick else 300.0)
+    sign = not (args.no_sign or args.nonce)
 
     def step(name, fn):
         if name in skip:
@@ -164,14 +169,17 @@ def main(argv=None) -> int:
     receipt = build_receipt(product=product, min_class=min_class, identity=identity, measurements=measurements,
                             thresholds=thresholds, verdict=verdict, timing=timing, purpose=purpose,
                             contract_id=(contract or {}).get("contract_id"), venue=args.venue,
-                            sign=not args.no_sign, oracle_name=args.oracle_name)
+                            sign=sign, oracle_name=args.oracle_name, nonce=args.nonce)
     out = Path(args.out) if args.out else Path("receipts") / f"{receipt['receipt_id']}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         json.dump(receipt, f, ensure_ascii=False, indent=1)
     _print_summary(receipt)
-    ok, msg = verify_receipt(receipt)
-    print(f"vérification    : {msg}")
+    if sign:
+        ok, msg = verify_receipt(receipt)
+        print(f"vérification    : {msg}")
+    else:
+        print("lot non signé     : à transmettre au contrôleur (python -m oracle.sign <fichier>) qui recalcule, vérifie et signe")
     print(f"fichier         : {out}")
     if args.json:
         print(json.dumps(receipt, ensure_ascii=False, indent=1))

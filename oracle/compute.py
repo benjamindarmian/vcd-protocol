@@ -55,7 +55,9 @@ def measure_compute_device(index: int, seconds: float = 15.0) -> dict:
         return {"device": index, "status": "n/a", "reason": "CUDA indisponible"}
     dev = torch.device(f"cuda:{index}")
     dtype = matmul_dtype(torch, index)
-    for n in (8192, 4096, 2048):
+    import os, random
+    first = 8192 if os.environ.get("VCD_FIXED_SIZES") else random.choice((7936, 8192, 8448))
+    for n in (first, 4096, 2048):
         try:
             with torch.cuda.device(dev):
                 r = _matmul_loop(torch, dev, n, seconds, dtype)

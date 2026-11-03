@@ -51,6 +51,25 @@ Le produit `T4.PCIE.1` ou `P100.PCIE.1` est déduit automatiquement. Le but n'es
 vérifier que la suite identifie correctement la machine et donne des chiffres cohérents avec les
 performances connues (T4 : environ 20 à 25 TFLOPS BF16/FP16 mesurés, 250 GB/s de mémoire).
 
+## Pour un contrat : lot brut sur la machine, signature au contrôleur
+
+La machine mesurée ne doit jamais voir la clé. Le flux est donc en deux temps :
+
+```bash
+# 1. sur la machine livrée (par SSH, avec les identifiants de l'acheteur) : lot NON signé, avec le défi du contrôleur
+python -m oracle.run --product H100.SXM.8 --min-class A --contract contrat.json --nonce 7f3a…  --out lot.json
+
+# 2. sur le contrôleur de l'oracle : vérification du nonce, recalcul des débits depuis les compteurs bruts,
+#    recalcul du verdict avec les seuils du contrôleur, puis signature
+python -m oracle.sign lot.json --nonce 7f3a… --out recu.json
+```
+
+Le contrôleur refuse (code 2) tout lot dont un débit résumé ne correspond pas à ses compteurs, dont le nonce est
+faux, qui est déjà signé, ou dont les durées déclarées ne tiennent pas dans la fenêtre de mesure. Les durées des
+tests sont tirées au hasard à ±20 % et la taille des matrices parmi trois valeurs, pour qu'un vendeur ne puisse pas
+reconnaître la mesure. Pour la calibration sur une machine qu'on contrôle, l'auto-signature (`oracle.run` sans
+`--nonce`) reste acceptable et c'est ce que fait le notebook.
+
 ## Clé de l'oracle
 
 À la première exécution, une clé ed25519 est créée dans `~/.vcd/oracle_key.pem` (ou `VCD_ORACLE_KEY_FILE`).

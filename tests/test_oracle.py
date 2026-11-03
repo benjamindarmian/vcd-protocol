@@ -199,3 +199,95 @@ def test_cli_cpu_end_to_end(tmp_path):
     assert r["verdict"]["class"] == "FAIL"  # pas de GPU : identité non conforme
     assert verify_receipt(r)[0]
     assert "VERDICT" in p.stdout
+
+
+# ---------- contrôleur : lot brut -> vérification -> signature ----------
+from oracle.sign import check_bundle  # noqa: E402
+
+
+def _bundle(tmp_path):
+    ident = h100_node_identity()
+    m = good_measurements()
+    # compteurs bruts cohérents avec les résumés
+    m["compute"]["per_device"] = [{"device": i, "status": "ok", "tflops": 612.0, "matrix": 8192, "seconds": 15.0,
+                                   "warmup_seconds": 5.0, "iters": round(612.0e12 * 15.0 / (2 * 8192 ** 3))} for i in range(8)]
+    for d in m["compute"]["per_device"]:
+        d["tflops"] = round(2 * 8192 ** 3 * d["iters"] / 15.0 / 1e12, 1)
+    m["compute"]["min_tflops"] = min(d["tflops"] for d in m["compute"]["per_device"])
+    m["hbm"]["per_device"] = [{"device": i, "status": "ok", "gbs": 2890.0, "buffer_bytes": 1 << 30, "seconds": 5.0,
+                               "iters": round(2890.0e9 * 5.0 / (2 * (1 << 30)))} for i in range(8)]
+    for d in m["hbm"]["per_device"]:
+        d["gbs"] = round(2 * (1 << 30) * d["iters"] / 5.0 / 1e9, 1)
+    m["hbm"]["min_gbs"] = min(d["gbs"] for d in m["hbm"]["per_device"])
+    ar = {"status": "ok", "bytes": 256 << 20, "iters": 20, "seconds": 0.0224, "world": 8}
+    ar["algbw_gbs"] = round(ar["bytes"] * ar["iters"] / ar["seconds"] / 1e9, 1)
+    ar["busbw_gbs"] = round(ar["algbw_gbs"] * 2 * 7 / 8, 1)
+    m["interconnect"] = {"status": "ok", "busbw_gbs": ar["busbw_gbs"], "allreduce": ar, "p2p": {"status": "ok", "gbs": 240.0}}
+    m["stability"]["per_device"] = [{"device": i, "tflops_first_slice": 608.0, "tflops_last_slice": 594.0, "degradation_pct": 2.3} for i in range(8)]
+    m["stability"]["max_degradation_pct"] = 2.3
+    m["stability"]["seconds"] = 300.0
+    v = compute_verdict("H100.SXM.8", PRODUCTS, ident, m, "A")
+    b = build_receipt(product="H100.SXM.8", min_class="A", identity=ident, measurements=m,
+                      thresholds=PRODUCTS["products"]["H100.SXM.8"], verdict=v,
+                      timing={"measure_start": "2026-11-03T10:00:00+00:00", "measure_end": "2026-11-03T10:10:00+00:00", "mode": "full"},
+                      sign=False, nonce="defi-123")
+    assert b["signature"] is None
+    return b
+
+
+def test_controller_accepts_consistent_bundle(tmp_path):
+    from oracle.receipt import sign_bundle
+    b = _bundle(tmp_path)
+    errors, warnings, verdict = check_bundle(b, "defi-123", PRODUCTS)
+    assert errors == [], errors
+    assert verdict["class"] == "A"
+    r = sign_bundle(b, tmp_path / "controller.pem")
+    assert verify_receipt(r)[0]
+    assert r["oracle"]["key_id"].startswith("oracle-")
+
+
+def test_controller_refuses_summary_not_backed_by_counters(tmp_path):
+    b = _bundle(tmp_path)
+    b["measurements"]["compute"]["per_device"][3]["tflops"] = 999.0  # résumé gonflé, compteurs inchangés
+    b["measurements"]["compute"]["min_tflops"] = 999.0
+    errors, _, _ = check_bundle(b, "defi-123", PRODUCTS)
+    assert any("compute GPU 3" in e for e in errors)
+
+
+def test_controller_refuses_wrong_nonce_and_signed_bundle(tmp_path):
+    b = _bundle(tmp_path)
+    errors, _, _ = check_bundle(b, "autre-defi", PRODUCTS)
+    assert any("nonce" in e for e in errors)
+    b2 = dict(b)
+    b2["signature"] = "deadbeef"
+    errors2, _, _ = check_bundle(b2, "defi-123", PRODUCTS)
+    assert any("déjà signé" in e for e in errors2)
+
+
+def test_controller_recomputes_verdict_with_its_own_thresholds(tmp_path):
+    b = _bundle(tmp_path)
+    b["verdict"]["class"] = "A"
+    b["measurements"]["interconnect"]["allreduce"]["seconds"] = 0.5  # 20 x 256 MiB en 0,5 s : ~10 GB/s busbw
+    ar = b["measurements"]["interconnect"]["allreduce"]
+    ar["algbw_gbs"] = round(ar["bytes"] * ar["iters"] / ar["seconds"] / 1e9, 1)
+    ar["busbw_gbs"] = round(ar["algbw_gbs"] * 2 * 7 / 8, 1)
+    b["measurements"]["interconnect"]["busbw_gbs"] = ar["busbw_gbs"]
+    errors, warnings, verdict = check_bundle(b, "defi-123", PRODUCTS)
+    assert errors == []
+    assert verdict["class"] == "C"
+    assert any("verdict recalculé" in w for w in warnings)
+
+
+def test_cli_sign_roundtrip(tmp_path):
+    b = _bundle(tmp_path)
+    p = tmp_path / "bundle.json"
+    json.dump(b, open(p, "w"))
+    env = {"PATH": "/usr/bin:/bin:/usr/local/bin"}
+    out = subprocess.run([sys.executable, "-m", "oracle.sign", str(p), "--nonce", "defi-123", "--key-file", str(tmp_path / "c.pem"),
+                          "--out", str(tmp_path / "r.json")], cwd=ROOT, capture_output=True, text=True, env=env, timeout=60)
+    assert out.returncode == 0, out.stdout + out.stderr
+    r = json.load(open(tmp_path / "r.json"))
+    assert verify_receipt(r)[0] and r["controller_checks"]["errors"] == []
+    bad = subprocess.run([sys.executable, "-m", "oracle.sign", str(p), "--nonce", "mauvais", "--key-file", str(tmp_path / "c.pem")],
+                         cwd=ROOT, capture_output=True, text=True, env=env, timeout=60)
+    assert bad.returncode == 2

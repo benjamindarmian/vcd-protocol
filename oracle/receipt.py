@@ -54,7 +54,10 @@ def receipt_hash(receipt: dict) -> str:
 
 def build_receipt(*, product: str, min_class: str, identity: dict, measurements: dict, thresholds: dict, verdict: dict,
                   timing: dict, purpose: str = "contract", contract_id: str | None = None, venue: str | None = None,
-                  key_file: Path = DEFAULT_KEY_FILE, sign: bool = True, oracle_name: str | None = None) -> dict:
+                  key_file: Path = DEFAULT_KEY_FILE, sign: bool = True, oracle_name: str | None = None,
+                  nonce: str | None = None) -> dict:
+    """Construit un reçu. Avec sign=False, le résultat est un *lot de mesures* non signé : c'est ce que produit la
+    machine mesurée ; la signature est apposée ensuite par le contrôleur de l'oracle (sign_bundle), qui seul détient la clé."""
     priv, pub_b64, key_id = (None, None, None)
     if sign:
         priv, pub_b64, key_id = load_or_create_key(key_file)
@@ -67,6 +70,7 @@ def build_receipt(*, product: str, min_class: str, identity: dict, measurements:
         "product": product,
         "min_class": min_class,
         "venue": venue,
+        "nonce": nonce,
         "timing": timing,
         "identity": identity,
         "measurements": measurements,
@@ -81,6 +85,21 @@ def build_receipt(*, product: str, min_class: str, identity: dict, measurements:
         receipt["signature"] = base64.b64encode(sig).decode()
     else:
         receipt["signature"] = None
+    return receipt
+
+
+def sign_bundle(bundle: dict, key_file: Path = DEFAULT_KEY_FILE, oracle_name: str | None = None) -> dict:
+    """Signe un lot de mesures côté contrôleur : remplace l'identité d'oracle, recalcule le hash, signe.
+    Le lot doit déjà avoir été contrôlé (voir oracle.sign) : cette fonction ne vérifie rien."""
+    priv, pub_b64, key_id = load_or_create_key(key_file)
+    if priv is None:
+        raise RuntimeError("bibliothèque cryptography absente : impossible de signer")
+    receipt = dict(bundle)
+    receipt["oracle"] = {"key_id": key_id, "public_key": pub_b64, "name": oracle_name}
+    receipt["signed_at"] = now_iso()
+    h = receipt_hash(receipt)
+    receipt["hash"] = h
+    receipt["signature"] = base64.b64encode(priv.sign(bytes.fromhex(h))).decode()
     return receipt
 
 

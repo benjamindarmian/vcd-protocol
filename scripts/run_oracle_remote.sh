@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Exécute la suite de conformité VCD sur une machine fraîchement livrée.
 # Usage : bash run_oracle_remote.sh [--product H100.SXM.8 --min-class A | --detect] [autres options de oracle.run]
-# Variables : VCD_REPO (dépôt git), VCD_DIR (dossier de travail), VCD_ORACLE_KEY_FILE (clé ed25519)
+# Variables : VCD_REPO (dépôt git), VCD_DIR (dossier de travail), VCD_NONCE (défi du contrôleur : le lot est alors non signé)
 set -euo pipefail
 REPO="${VCD_REPO:-https://github.com/benjamindarmian/vcd-protocol.git}"
 DIR="${VCD_DIR:-$HOME/vcd}"

@@ -95,6 +95,16 @@ Le reçu est produit par la suite de conformité (code de référence : `oracle/
 - `hash` : SHA-256 du reçu canonique (JSON trié, sans espaces, sans les champs `hash` et `signature`) ;
 - `signature` : signature ed25519 du `hash` par la clé de l'oracle.
 
+Le reçu contient les **compteurs bruts** de chaque mesure (itérations, octets, secondes, tranches de charge), pas
+seulement les débits : quiconque peut recalculer les débits à partir des compteurs. Il contient aussi un **nonce**,
+un défi fourni par le contrôleur de l'oracle avant la mesure, qui empêche de resservir un ancien lot.
+
+La **signature est apposée par le contrôleur de l'oracle, jamais sur la machine mesurée**. La machine mesurée produit
+un lot non signé ; le contrôleur vérifie le nonce, recalcule chaque débit à partir des compteurs bruts et refuse tout
+lot dont le résumé ne correspond pas aux compteurs, recalcule le verdict avec son propre exemplaire des seuils, puis
+signe. La clé privée ne quitte donc jamais l'infrastructure de l'oracle, et un vendeur qui héberge la mesure ne peut
+ni la copier ni faire signer des chiffres qu'il aurait écrits lui-même.
+
 Un reçu est **vérifiable par quiconque** possède la clé publique de l'oracle. Les reçus sont publiés dans un journal public en ajout seul (en v0.1 : un dépôt git, un fichier par reçu), de sorte que l'historique de livraison de chaque vendeur et la méthode de chaque oracle soient auditables.
 
 ## 6. Règlement
@@ -147,7 +157,11 @@ Les frais sont un paramètre du contrat, exprimés en % du notionnel, prélevés
 
 ## 7. Oracles
 
-Un oracle est admis s'il publie sa méthode, exécute une suite de conformité d'une version acceptée par le contrat, et signe ses reçus avec une clé dont la publique est enregistrée. Un oracle ne doit être ni vendeur ni acheteur du contrat qu'il mesure. Les reçus d'un oracle sont auditables dans le journal ; un oracle dont les reçus sont contredits par des contre-mesures perd son agrément.
+Un oracle est admis s'il publie sa méthode, exécute une suite de conformité d'une version acceptée par le contrat, et signe ses reçus avec une clé dont la publique est enregistrée. Un oracle ne doit être ni vendeur ni acheteur du contrat qu'il mesure. Il fournit un nonce par mesure, ne signe que
+depuis son contrôleur après recalcul des compteurs, et tire au hasard les durées et les tailles de ses tests dans des
+bornes publiées, de sorte qu'un vendeur ne puisse pas reconnaître la mesure et lui réserver une machine mieux réglée
+que celle livrée au client. Pour un contrat, l'oracle mesure la machine exactement livrée à l'acheteur, avec les
+identifiants de l'acheteur. Les reçus d'un oracle sont auditables dans le journal ; un oracle dont les reçus sont contredits par des contre-mesures perd son agrément.
 
 La suite de conformité de référence est décrite dans `oracle/README.md`. Elle dure environ dix minutes en mode complet (cinq minutes de charge de stabilité) et deux minutes en mode rapide. Seul le mode complet fait foi pour un contrat et pour la calibration d'un seuil ; le mode rapide vérifie l'identité et l'accès. La mesure de calcul exclut la montée en charge initiale (boost d'horloge) et ne compte que le régime établi.
 
